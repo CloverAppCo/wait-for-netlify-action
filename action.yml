@@ -10,6 +10,9 @@ inputs:
   max_timeout:
     description: "The max time to wait after the deployment is ready for a valid HTTP status code."
     required: false
+  max_build_timeout:
+    description: "The max time to wait for the deployment build to complete. will increment every 30 seconds for 15 * max_build_timeout value."
+    required: false
 outputs:
   deploy_id:
     description: "The Netlify deployment ID"
