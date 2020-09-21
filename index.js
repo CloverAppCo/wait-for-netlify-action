@@ -95,7 +95,8 @@ const run = async () => {
     const commitSha =
       github.context.eventName === 'pull_request' ? github.context.payload.pull_request.head.sha : github.context.sha;
     const MAX_CREATE_TIMEOUT = 60 * 5; // 5 min
-    const MAX_WAIT_TIMEOUT = 60 * 15; // 15 min
+    const MAX_BUILD_TIMEOUT = Number(core.getInput('max_build_timeout')) || 60;
+    const MAX_WAIT_TIMEOUT = MAX_BUILD_TIMEOUT * 15; // 15 min
     const MAX_READY_TIMEOUT = Number(core.getInput('max_timeout')) || 60;
     const siteId = core.getInput('site_id');
 
