@@ -13,16 +13,18 @@ function getNetlifyUrl(url) {
 }
 
 const waitForDeployCreation = (url, commitSha, MAX_TIMEOUT) => {
-  const increment = 15;
+  const increment = 5;
 
   return new Promise((resolve, reject) => {
     let elapsedTimeSeconds = 0;
 
-    const handle = setInterval(async () => {
+    const checkForDeployCreation = async () => {
       elapsedTimeSeconds += increment;
 
       if (elapsedTimeSeconds >= MAX_TIMEOUT) {
-        clearInterval(handle);
+        if (handle) {
+          clearInterval(handle);
+        }        
         return reject(`Timeout reached: Deployment was not created within ${MAX_TIMEOUT} seconds.`);
       }
 
@@ -35,23 +37,29 @@ const waitForDeployCreation = (url, commitSha, MAX_TIMEOUT) => {
       const commitDeployment = netlifyDeployments.find((d) => d.commit_ref === commitSha);
 
       if (commitDeployment) {
-        clearInterval(handle);
+        if (handle) {
+          clearInterval(handle);
+        }
         return resolve(commitDeployment);
       }
 
       console.log(`Not yet created, waiting ${increment} more seconds...`);
-    }, increment * 1000);
+    }
+
+    // check immediately, then start the interval checks
+    checkForDeployCreation()
+    const handle = setInterval(checkForDeployCreation, increment * 1000);
   });
 };
 
 const waitForReadiness = (url, MAX_TIMEOUT) => {
-  const increment = 30;
+  const increment = 10;
 
   return new Promise((resolve, reject) => {
     let elapsedTimeSeconds = 0;
     let state;
 
-    const handle = setInterval(async () => {
+    const checkForReadiness = async () => {
       elapsedTimeSeconds += increment;
 
       if (elapsedTimeSeconds >= MAX_TIMEOUT) {
@@ -71,7 +79,11 @@ const waitForReadiness = (url, MAX_TIMEOUT) => {
       }
 
       console.log(`Not yet ready, waiting ${increment} more seconds...`);
-    }, increment * 1000);
+    };
+
+    // check immediately, then start the interval checks
+    checkForReadiness()
+    const handle = setInterval(checkForReadiness, increment * 1000);
   });
 };
 
